@@ -8,7 +8,7 @@
  * onClicked Broweser Action: 
  * http://developer.chrome.com/extensions/browserAction.html#event-onClicked
  */
-chrome.browserAction.onClicked.addListener(function(tab){
+chrome.action.onClicked.addListener(function(tab){
 
   chrome.bookmarks.getTree(function(bookmarkTreeNodes){
     updateBookmarkFromTab(tab,bookmarkTreeNodes);
@@ -57,7 +57,7 @@ function updateBookmarkFromTab(tab,bookmarkTreeNode){
          *
          * default to matchPrefix if no algorithms has been set yet 
          */
-        var matchAlgorithm = localStorage.matchAlgorithm;
+        var matchAlgorithm = chrome.storage.local.matchAlgorithm;
         if( matchAlgorithm == undefined) { matchAlgorithm = "matchPrefix"}
         switch (matchAlgorithm){
           case "matchPrefix":
@@ -274,17 +274,7 @@ function showUpdateNotification(bookmarkTitle, oldBookmarkUrl, newBookmarkUrl){
   //for now just mention the bookmark title, leave old and new url out.
   var body = "Update " +
     "\"" + bookmarkTitle + "\"";
-
-  var notification = webkitNotifications.createNotification(
-    '',  //don't use an icon
-    'ComicUpdater',  // notification title
-    body  // notification body text
-  );
-  notification.show();
-
-  //automatically close the notification after 3 seconds
-  //todo: allow timeout to be set in a settings page
-  window.setTimeout(function (){notification.cancel();},3000);
+  createTimedOutNotification('ComicUpdater', body, 3000);
 }
 
 /*
@@ -301,6 +291,7 @@ function showUpdateNotification(bookmarkTitle, oldBookmarkUrl, newBookmarkUrl){
  * http://developer.chrome.com/extensions/notifications.html
  */
 function showUndoNotification(bookmarkTreeNode, oldBookmarkUrl){
+/*
   //for now just mention the bookmark title, leave old and new url out.
   var body = "Update  " +
     "\"" + bookmarkTreeNode.title + "\"";
@@ -330,21 +321,13 @@ function showUndoNotification(bookmarkTreeNode, oldBookmarkUrl){
     console.groupEnd();
 
     //inform user of the undo action
-    var body = 'Rolled back update of "' + bookmarkTreeNode.title + '"';
-    var notification = createTimedOutNotification(
-      'Update rolled back',
-      body,
-      5000
-    );
-    notification.show();
-  };
-
-  notification.show();
-
+    createTimedOutNotification(title, body, timeout)
+    }
+*/
 }
 
 /*
- * Create a Nofitifaction object that will automatically disappear after a
+ * Create a Nofitifaction that will automatically disappear after a
  * given time without the need for any user interaction.
  *
  * @param {String} title the title of the notification.
@@ -353,31 +336,19 @@ function showUndoNotification(bookmarkTreeNode, oldBookmarkUrl){
  *
  * @param {int} timeout the time in ms after which the notification should
  * automatically disappear once it is displayed.
- *
- * @returns {Notification} The returned notification can be displayed using the
- * show() method. It makes use of the ondisplay attribute to automatically
- * close it again after the given time has lapsed. 
- *
- * See also:
- * http://www.chromium.org/developers/design-documents/desktop-notifications/api-specification
- * http://developer.chrome.com/extensions/notifications.html
- *
  */
 function createTimedOutNotification(title, body, timeout){
-  var notification = webkitNotifications.createNotification(
-    '', //don't use and icon
-    title,
-    body);
-
-  //automatically close the notification 'timeout' milliseconds after it is
-  //dislayed
-  //todo: allow timeout to be set in a settings page
-  notification.ondisplay = function(){
-    window.setTimeout(
-      function(){ notification.cancel()},
-      timeout)
-    }
-  
-  return notification;
+  chrome.notifications.create('notification', {title: title, message: body, type: 'basic'} );
+  window.setTimeout( function() { chrome.notifications.clear('notification') }, timeout);
 }
 
+
+function alert(msg) {
+/*    browser.notifications.create({
+        type : 'basic',
+        message : msg,
+        title : 'Extension alert'
+    });
+*/
+createTimedOutNotification('', msg, 3000)
+}

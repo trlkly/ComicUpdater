@@ -1,9 +1,9 @@
 
-// Saves options to localStorage.
-function save_options() {
+// Saves options to local extension storage.
+async function save_options() {
   var select = document.getElementById("matchAlgorithm");
   var matchAlgorithm = select.children[select.selectedIndex].value;
-  localStorage.matchAlgorithm = matchAlgorithm;
+  await chrome.storage.local.set({ 'matchAlgorithm': matchAlgorithm });
 
   // Update status to let user know options were saved.
   var status = document.getElementById("status");
@@ -13,9 +13,9 @@ function save_options() {
   }, 750);
 }
 
-// Restores select box state to saved value from localStorage.
-function restore_options() {
-  var matchAlgorithm = localStorage.matchAlgorithm;
+// Restores select box state to saved value from local extension storage.
+async function restore_options() {
+  var matchAlgorithm = (await chrome.storage.local.get(['matchAlgorithm'])).matchAlgorithm;
   if (!matchAlgorithm) {
     /*Fixme: this fallback to matchPrefix if nothing is configured is also
      * explicitly used in eventpage.js.

@@ -2,11 +2,13 @@
   "name": "Comic Updater",
   "description": "A button that replaces the bookmark location that shares the most characters with the current tab with the current tab's location.",
   "version": "1.0",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "background": {
-    "scripts": ["eventPage.js"]
+    "service_worker": "eventPage.js"
   },
-  "options_page": "options.html",
+  "options_ui": {
+    "page": "options.html"
+  },
   "icons":{
     "16": "icon16.png",
     "48": "icon48.png",
@@ -15,9 +17,10 @@
   "permissions": [
     "bookmarks",
     "notifications",
-    "tabs"
+    "tabs",
+    "storage"
   ],
-  "browser_action": {
+  "action": {
       "default_title": "Update Closest Bookmark",
       "default_icon": "icon16.png"
   },
